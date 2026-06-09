@@ -561,19 +561,21 @@ body::before {
 /* CROSSWORD GRID */
 .crossword-grid {
   display: grid;
-  grid-template-columns: repeat(5, 52px);
-  grid-template-rows: repeat(5, 52px);
-  gap: 3px;
+  gap: 2px;
   background: var(--border);
   border: 2px solid var(--border);
   border-radius: 3px;
   padding: 3px;
   flex-shrink: 0;
+  overflow: auto;
+  max-height: 70vh;
 }
 
 .cw-cell {
   position: relative;
   background: var(--panel);
+  width: 36px;
+  height: 36px;
 }
 
 .cw-cell.black {
@@ -2105,7 +2107,7 @@ body::before {
     <div class="hint-body">
       <div class="hint-label">CADDY ★★★ — 조언</div>
       <div class="hint-text" id="hint-text">...</div>
-      <div class="hint-penalty">⚠ 벌타 +0.5타 적용됨</div>
+      <div class="hint-penalty">⚠ 벌타 +1타 적용됨</div>
     </div>
   </div>
 
@@ -2267,7 +2269,7 @@ body::before {
     <div class="caddy-intro-text" id="caddy-intro-text">
       "안녕하세요! 저는 최고급 해커 캐디 <b style="color:var(--purple)">★★★</b>입니다.<br>
       이번 홀에서 <b style="color:var(--yellow)">2번</b>까지 힌트를 드릴 수 있어요.<br>
-      단, 힌트를 쓸 때마다 <b style="color:var(--red)">+0.5타 벌타</b>가 붙는다는 점 주의하세요!"
+      단, 힌트를 쓸 때마다 <b style="color:var(--red)">+1타 벌타</b>가 붙는다는 점 주의하세요!"
     </div>
     <button class="btn-caddy-ok" onclick="closeCaddyIntro()">알겠습니다 ▶</button>
   </div>
@@ -2429,33 +2431,37 @@ const QUESTIONS = {
     },
   ]
 };
-// Prologue crossword data (5x5)
-const CROSSWORD = {
-  grid: [
-    // row0: V I R U S
-    // row1: _ R _ _ _
-    // row2: W O R M _
-    // row3: _ O _ _ _
-    // row4: _ T _ _ _
-    ['V','I','R','U','S'],
-    [null,'R',null,null,null],
-    ['W','O','R','M',null],
-    [null,'O',null,null,null],
-    [null,'T',null,null,null],
+// Prologue crossword data
+// 그리드: 13행 × 9열
+// SNIFFING: 가로 row6, col0~7
+// FIREWALL: 세로 col2, row5~12
+// PHISHING: 세로 col6, row0~7
+// WORM:     가로 row9, col2~5
+const CW_SOLUTION = [
+  [null,null,null,null,null,null,'P',null,null],  // row0
+  [null,null,null,null,null,null,'H',null,null],  // row1
+  [null,null,null,null,null,null,'I',null,null],  // row2
+  [null,null,null,null,null,null,'S',null,null],  // row3
+  [null,null,null,null,null,null,'H',null,null],  // row4
+  [null,null,'F',null,null,null,'I',null,null],   // row5
+  ['S','N','I','F','F','I','N','G',null],          // row6 (SNIFFING)
+  [null,null,'R',null,null,null,'G',null,null],   // row7
+  [null,null,'E',null,null,null,null,null,null],  // row8
+  [null,null,'W','O','R','M',null,null,null],     // row9 (WORM)
+  [null,null,'A',null,null,null,null,null,null],  // row10
+  [null,null,'L',null,null,null,null,null,null],  // row11
+  [null,null,'L',null,null,null,null,null,null],  // row12
+];
+
+const CW_CLUES = {
+  across:[
+    { num:1, clue:"네트워크상을 오가는 데이터 패킷을 몰래 가로채 내용을 엿보는 행위 (8글자)" },
+    { num:3, clue:"다른 파일에 기생하지 않고 스스로 복제하며 네트워크를 통해 퍼져나가는 악성 프로그램 (4글자)" },
   ],
-  clues: {
-    across:[
-      {num:1, clue:"컴퓨터를 감염시키는 악성 소프트웨어 총칭 (5글자)", row:0, col:0, len:5},
-      {num:3, clue:"파일에 기생하지 않고 스스로 복제·전파되는 악성코드 (4글자)", row:2, col:0, len:4},
-    ],
-    down:[
-      {num:2, clue:"인증 없이 시스템에 접근하는 악용 취약점 (한글 아님, 영문 6자, 세로)", row:0, col:1, len:5},
-      {num:4, clue:"시스템 최고 권한 계정 이름 (4글자, 세로)", row:0, col:1, len:5}, // actually IROOT -> no, IROOT... let me use correct: col1 = I,R,O,O,T -> col1 word = IROOT? No. col1: I,R,O,O,T = IROOT
-    ]
-  },
-  // Actually col 1 spells: I,R,O,O,T = no. Let me recalc:
-  // row0[1]=I, row1[1]=R, row2[1]=O, row3[1]=O, row4[1]=T -> IROOT? Doesn't make sense
-  // Let's use: col1 = I,R,O,O,T -> The intended word is ROOT spanning from row1 to row4
+  down:[
+    { num:2, clue:"외부 네트워크로부터 내부 시스템을 보호하기 위해 트래픽을 감시·차단하는 보안 시스템 (8글자)" },
+    { num:4, clue:"은행·기관을 사칭한 가짜 이메일·웹사이트로 비밀번호와 개인정보를 빼내는 사이버 공격 (8글자)" },
+  ]
 };
 
 const ITEMS = {
@@ -2618,24 +2624,6 @@ function nextDialog() {
 // ══════════════════════════════════════════
 //  PROLOGUE CROSSWORD
 // ══════════════════════════════════════════
-const CW_SOLUTION = [
-  ['V','I','R','U','S'],
-  [null,'R',null,null,null],
-  ['W','O','R','M',null],
-  [null,'O',null,null,null],
-  [null,'T',null,null,null],
-];
-
-const CW_CLUES = {
-  across:[
-    { num:1, clue:"컴퓨터에 침투해 자가 복제하는 악성 프로그램 총칭 (5글자)" },
-    { num:3, clue:"파일 없이 메모리·네트워크로만 전파되는 악성코드 (4글자)" },
-  ],
-  down:[
-    { num:2, clue:"콜 스택을 덮어써 코드 실행을 탈취하는 공격 기법 두 번째 단어 (최고 권한 계정명, 4글자)" },
-  ]
-};
-
 function initPuzzle() {
   const grid = document.getElementById('cw-grid');
   grid.innerHTML='';
@@ -2643,13 +2631,23 @@ function initPuzzle() {
   const cluesD = document.getElementById('clues-down');
   cluesA.innerHTML=''; cluesD.innerHTML='';
 
-  // Number map: which cells get numbers
+  const ROWS = CW_SOLUTION.length;
+  const COLS = CW_SOLUTION[0].length;
+
+  // 숫자 맵
   const numMap = {
-    '0,0':1, '0,1':2, '2,0':3
+    '6,0':1,  // SNIFFING 시작
+    '5,2':2,  // FIREWALL 시작
+    '0,6':4,  // PHISHING 시작
+    '9,2':3,  // WORM 시작
   };
 
-  for(let r=0;r<5;r++){
-    for(let c=0;c<5;c++){
+  // 그리드 CSS 동적 설정
+  grid.style.gridTemplateColumns = `repeat(${COLS}, 36px)`;
+  grid.style.gridTemplateRows    = `repeat(${ROWS}, 36px)`;
+
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
       const cell = document.createElement('div');
       cell.className='cw-cell';
       const sol = CW_SOLUTION[r][c];
@@ -2668,8 +2666,8 @@ function initPuzzle() {
         inp.id=`cw_${r}_${c}`;
         inp.addEventListener('input', e=>{
           e.target.value=e.target.value.toUpperCase().slice(-1);
-          // Auto-advance
-          const next = document.getElementById(`cw_${r}_${c+1}`) || document.getElementById(`cw_${r+1}_${c}`);
+          // 가로 자동이동
+          const next = document.getElementById(`cw_${r}_${c+1}`);
           if(e.target.value && next) next.focus();
         });
         cell.appendChild(inp);
@@ -2689,23 +2687,21 @@ function initPuzzle() {
     cluesD.appendChild(d);
   });
 
-  // Timer
-  G.puzzleTimeLeft=90;
+  // 타이머
+  G.puzzleTimeLeft=120;
   updatePuzzleTimer();
   G.puzzleTimer=setInterval(()=>{
     G.puzzleTimeLeft--;
     updatePuzzleTimer();
     if(G.puzzleTimeLeft<=0){
       clearInterval(G.puzzleTimer);
-      // Time up — no item but continue
       showNotif('시간 초과! 아이템 없이 진행합니다.', 'error');
       setTimeout(startHoleBattle, 1500);
     }
   },1000);
 }
-
 function updatePuzzleTimer(){
-  const pct = (G.puzzleTimeLeft/90)*100;
+  const pct = (G.puzzleTimeLeft/120)*100;
   const fill = document.getElementById('puzzle-timer-fill');
   fill.style.width=pct+'%';
   if(pct<33) fill.classList.add('danger');
@@ -2713,9 +2709,11 @@ function updatePuzzleTimer(){
 }
 
 function checkCrossword(){
+  const ROWS = CW_SOLUTION.length;
+  const COLS = CW_SOLUTION[0].length;
   let allCorrect=true;
-  for(let r=0;r<5;r++){
-    for(let c=0;c<5;c++){
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
       if(CW_SOLUTION[r][c]===null) continue;
       const inp=document.getElementById(`cw_${r}_${c}`);
       if(!inp) continue;
@@ -2738,9 +2736,10 @@ function checkCrossword(){
 }
 
 function hintCrossword(){
-  // Reveal one random unfilled correct cell
+  const ROWS = CW_SOLUTION.length;
+  const COLS = CW_SOLUTION[0].length;
   let cells=[];
-  for(let r=0;r<5;r++) for(let c=0;c<5;c++){
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
     if(CW_SOLUTION[r][c]!==null){
       const inp=document.getElementById(`cw_${r}_${c}`);
       if(inp && inp.value!==CW_SOLUTION[r][c]) cells.push({r,c});
@@ -3115,7 +3114,7 @@ function processAnswer(correct, q){
 
   // Base strokes for this shot: 1 (correct) or 1+penalty (wrong)
   // Plus 0.5 caddy penalty if hint used this question
-  const caddyPen = G.caddyHintUsedThisQ ? 0.5 : 0;
+  const caddyPen = G.caddyHintUsedThisQ ? 1 : 0;
   G.playerStrokes[G.holeIdx] += (correct ? 1 : 1+penalty) + caddyPen;
 
   const resEl=document.getElementById('shot-result');
@@ -3143,15 +3142,15 @@ function processAnswer(correct, q){
       setTimeout(()=>showNotif(`🎒 아이템 드롭! ${ITEMS[bonusKey].icon} ${ITEMS[bonusKey].name} 획득!`, 'success'), 500);
     } else {
       title.textContent='정답! — '+shotName+' 성공';
-      desc.textContent=(q.exp||'')+(caddyPen>0?' (캐디 벌타 +0.5)':'');
+      desc.textContent=(q.exp||'')+(caddyPen>0?' (캐디 벌타 +1)':'');
       shotLabel.style.color='var(--green)';
-      shotLabel.textContent=caddyPen>0?'+1.5타':'+1타';
+      shotLabel.textContent=caddyPen>0?'+2타':'+1타';
     }
   } else {
     resEl.className='shot-result show result-wrong';
     icon.textContent='✗';
     title.textContent='오답! — '+shotName+' 실패';
-    desc.textContent=(q.exp||'')+(penalty>0?` (벌타 +${penalty})`:'')+(caddyPen>0?' + 캐디 벌타 +0.5':'');
+    desc.textContent=(q.exp||'')+(penalty>0?` (벌타 +${penalty})`:'')+(caddyPen>0?' + 캐디 벌타 +1':'');
     shotLabel.style.color='var(--red)';
     shotLabel.textContent=`+${1+penalty+caddyPen}타`;
   }
@@ -3474,7 +3473,7 @@ function showFinal(){
   if(invKeys.length > 0){
     const invLabel = document.createElement('div');
     invLabel.style.cssText='width:100%;font-family:var(--pixel);font-size:10px;color:var(--cyan);letter-spacing:1px;margin-bottom:8px';
-    invLabel.textContent='🎒 보유 아이템';
+    invLabel.textContent='';
     grid.appendChild(invLabel);
 
     invKeys.forEach(k=>{
@@ -3505,7 +3504,11 @@ function showFinal(){
   if(unlockedNew.length > 0){
     const eqLabel = document.createElement('div');
     eqLabel.style.cssText='width:100%;font-family:var(--pixel);font-size:10px;color:var(--yellow);letter-spacing:1px;margin:12px 0 8px';
-    eqLabel.textContent='🏆 획득된 장비';
+    eqLabel.textContent = outcome==='win'
+      ? '🏆 승리 보상으로 획득된 장비!'
+      : outcome==='tie'
+      ? '🤝 무승부 보상으로 획득된 장비'
+      : '🏆 획득된 장비';
     grid.appendChild(eqLabel);
 
     unlockedNew.forEach(o=>{
@@ -3627,11 +3630,12 @@ function showNotif(msg, type=''){
 }
 
 function shuffleArr(arr){
-  for(let i=arr.length-1;i>0;i--){
+  const copy = [...arr]; // 원본 보호
+  for(let i=copy.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]]=[arr[j],arr[i]];
+    [copy[i],copy[j]]=[copy[j],copy[i]];
   }
-  return arr;
+  return copy;
 }
 
 // ══════════════════════════════════════════
@@ -3717,7 +3721,7 @@ function useCaddyHint(){
   hintBox.classList.add('show');
 
   updateCaddyUI();
-  showNotif('💬 캐디 힌트 확인 (+0.5타 벌타 예약)','');
+  showNotif('💬 캐디 힌트 확인 (+1타 벌타 예약)','');
 }
 
 function closeCaddyIntro(){
